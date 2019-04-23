@@ -30,8 +30,8 @@ class Relation:
         attributes, domains = parse_schema(schema)
         # set class variables
         self.name = name  # name of the relation or expression the relation object was built from
-        self.attributes = attributes  # tuple of attribute names
-        self.domains = domains  # tuple of attribute types
+        self.attributes = attributes  # list of attribute names
+        self.domains = domains  # list of attribute types
         self.tuples = set()  # this ensures not having duplicates
 
     def add_tuple(self, tup):
