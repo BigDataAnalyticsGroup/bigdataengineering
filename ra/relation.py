@@ -130,14 +130,35 @@ class Relation:
         Prints LaTeX code for the relation in tabular layout
         """
         num_cols = len(self.attributes)
-        latex = '\\begin{tabular}{'+('l'*num_cols)+'}\n'\
-                + '\t'+' & '.join(attr for attr in self.attributes)+' \\\\\n' \
+        latex = Relation._escape_latex_symbols(self.name) +'\\\\\n'\
+                '\\begin{tabular}{'+('l'*num_cols)+'}\n'\
+                + '\t'+' & '.join("\\textbf{"+Relation._escape_latex_symbols(attr)+"}"\
+                                  for attr in self.attributes)+' \\\\\n' \
                 + '\t\\hline\n'
         for tup in self.tuples:
             latex += '\t'+' & '.join(str(attr) for attr in tup)+' \\\\\n'
         latex += '\\end{tabular}'
         print(latex)
-
+    
+    @staticmethod
+    def _escape_latex_symbols(string):
+        """
+        Replaces reserved symbols with escaped version for LaTeX output
+        
+        Args:
+            string (:obj: `string`): the string to be modified
+        
+        Returns:
+            LaTeX friendly string
+        """
+        sym_map = {'#': '\\#', '$': '\\textdollar', '%': '\\percent', '&': '\\&', '\\': '\\textbackslash',\
+                   '^': '\textcircumflex', '_': '\\textunderscore', '{': '\\textbraceleft', \
+                   '|': '\\textbar', '}': '\\textbraceright', '~': '\\textasciitilde'}
+        for sym in sym_map.keys():
+            string = string.replace(sym, sym_map[sym])
+        return string
+        
+        
     def to_DataFrame(self):
         """
         Converts the relation into a pandas DataFrame
