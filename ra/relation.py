@@ -1,4 +1,7 @@
 import pandas as pd
+import math
+import bisect
+import operator
 
 from .schema_utils import parse_schema
 
@@ -33,7 +36,8 @@ class Relation:
         self.attributes = attributes  # list of attribute names
         self.domains = domains  # list of attribute types
         self.tuples = set()  # this ensures not having duplicates
-
+        self.indexes = dict() # stores all secondary indexes of this relation, referenced by attribute
+        
     def add_tuple(self, tup):
         """
         Adds the tuple tup to the relation.
@@ -52,7 +56,36 @@ class Relation:
             return True  # tuple was added
         else:
             return False  # tuple already existed
+
+        
+    def build_index(self, attribute):
+        """
+        Build a secondary index on the specified attribute
+        
+        Args:
+            attribute (:obj: `string`): the attribute name to be tested
+         
+        """        
+        assert(self.has_attribute(attribute))
+        
+        # create new index
+        new_index = dict()
+        attribute_index = self.get_attribute_index(attribute)
+        for t in self.tuples:
+            new_index[t[attribute_index]] = t
+        self.indexes[attribute] = new_index  
+        
+    def has_index_on(self, attribute):
+        assert(self.has_attribute(attribute))
+        return attribute in self.indexes
     
+    def get_index_on(self, attribute):
+        assert(self.has_attribute(attribute))
+        if(self.has_index_on(attribute)):
+            return self.indexes[attribute]
+        else:
+            return None
+        
     def _check_schema(self, tup):
         """
         Performs assertions to check wether `tup` matches the relation schema.
@@ -151,9 +184,9 @@ class Relation:
         Returns:
             LaTeX friendly string
         """
-        sym_map = {'#': '\\#', '$': '\\textdollar', '%': '\\percent', '&': '\\&', '\\': '\\textbackslash',\
-                   '^': '\textcircumflex', '_': '\\textunderscore', '{': '\\textbraceleft', \
-                   '|': '\\textbar', '}': '\\textbraceright', '~': '\\textasciitilde'}
+        sym_map = {'#': '\\# ', '$': '\\textdollar ', '%': '\\percent ', '&': '\\& ', '\\': '\\textbackslash ',\
+                   '^': '\textcircumflex ', '_': '\\textunderscore ', '{': '\\textbraceleft ', \
+                   '|': '\\textbar ', '}': '\\textbraceright ', '~': '\\textasciitilde '}
         for sym in sym_map.keys():
             string = string.replace(sym, sym_map[sym])
         return string
@@ -259,3 +292,106 @@ class Relation:
             True if the relations are equal
         """
         return self.tuples == other.tuples
+        
+        
+    
+class Index:
+    def sort_by_key(self, t): 
+        return t[0]  
+    
+    def __init__(self, relation, attribute):
+        self.relation = relation
+        self.attribute = attribute
+        attribute_index = self.relation.get_attribute_index(attribute)
+        self.data = []
+        for t in self.relation.tuples:
+            self.data.append((t[attribute_index], t))
+        self.data.sort(key = self.sort_by_key)
+        self.keys = [t[0] for t in self.data] 
+    
+    def index(self, a, x):
+        'Locate the leftmost value exactly equal to x'
+        i = bisect.bisect_left(a, x)
+        if i != len(a) and a[i] == x:
+            return i
+        return None
+
+    def find_lt(self, a, x):
+        'Find rightmost value less than x'
+        i = bisect.bisect_left(a, x)
+        if i:
+            return i-1
+        return None
+
+    def find_le(self, a, x):
+        'Find rightmost value less than or equal to x'
+        i = bisect.bisect_right(a, x)
+        if i:
+            return i-1
+        return None
+
+    def find_gt(self, a, x):
+        'Find leftmost value greater than x'
+        i = bisect.bisect_right(a, x)
+        if i != len(a):
+            return i
+        return None
+
+    def find_ge(self, a, x):
+        'Find leftmost item greater than or equal to x'
+        i = bisect.bisect_left(a, x)
+        if i != len(a):
+            return i
+        return None
+    
+    def get(self, comp_operator, key):
+        res = []
+        # == key
+        if(comp_operator is operator.eq):
+            i = self.index(self.keys, key)
+            if(i is None): return res
+            # get leftmost entry equal to key
+            while(self.data[i][0] == key and i < len(self.data)):
+                res.append(self.data[i][1])
+                i = i + 1
+        # > key
+        elif(comp_operator is operator.gt):
+            i = self.find_gt(self.keys, key)
+            if(i is None): return res
+            # get leftmost entry greater than key
+            while(i < len(self.data) and self.data[i][0] > key):
+                res.append(self.data[i][1])
+                i = i + 1
+        # >= key
+        elif(comp_operator is operator.ge):
+            i = self.find_ge(self.keys, key)
+            if(i is None): return res
+            # get leftmost entry greater than or equal to key
+            while(i < len(self.data) and self.data[i][0] >= key):
+                res.append(self.data[i][1])
+                i = i + 1
+        # < key
+        elif(comp_operator is operator.lt):
+            i = self.find_lt(self.keys, key)
+            if(i is None): return res
+            # get rightmost entry less than key
+            while(i >= 0 and self.data[i][0] < key):
+                res.append(self.data[i][1])
+                i = i - 1
+        # <= key
+        elif(comp_operator is operator.le):
+            i = self.find_le(self.keys, key)
+            if(i is None): return res
+            # get rightmost entry less than key
+            while(i >= 0 and self.data[i][0] <= key):
+                res.append(self.data[i][1])
+                i = i - 1
+        return res
+    
+    
+    
+    
+    
+    
+    
+
