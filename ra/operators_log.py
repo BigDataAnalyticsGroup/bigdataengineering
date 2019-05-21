@@ -567,3 +567,36 @@ class Grouping(UnaryOperator):
         node_label = caption.format(self.group_by, aggr)
         self._dot_helper(graph, prefix, node_name, node_label)
         return node_name
+    
+    
+class Intersection(SetOperator):
+    """The relational intersection operator
+    
+    Attributes:
+        l_input (:obj: Operator): The left input to the binary operator.
+        r_input (:obj: Operator): The right input to the binary operator.
+    """
+    def __init__(self, l_input, r_input):
+        super().__init__(l_input, r_input, operator.and_, "∩")
+        
+
+class Union(SetOperator):
+    """The relational union operator
+    
+    Attributes:
+        l_input (:obj: Operator): The left input to the binary operator.
+        r_input (:obj: Operator): The right input to the binary operator.
+    """
+    def __init__(self, l_input, r_input):
+        super().__init__(l_input, r_input, operator.or_, "∪")
+        
+        
+class Difference(SetOperator):
+    """The relational difference operator
+    
+    Attributes:
+        l_input (:obj: Operator): The left input to the binary operator.
+        r_input (:obj: Operator): The right input to the binary operator.
+    """
+    def __init__(self, l_input, r_input):
+        super().__init__(l_input, r_input, operator.sub, "−")
