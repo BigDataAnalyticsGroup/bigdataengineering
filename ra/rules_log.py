@@ -242,15 +242,24 @@ class InsertProjection(Rule):
     def __init__(self, root):
         super().__init__(root)
         self.processed_operators = set()
-                        
-    def _match(self, op, parent):
-        # collect the required attributes and annotate op accordingly 
-        self._annotate(op, parent)
-            
+        
+        # annotate entire tree
+        self._annotate(root, None)
+   
+    def _match(self, op, parent): 
         # match if op has not been processed so far and it is not the root
         if(op not in self.processed_operators and parent is not None):
             # check if the parent is not already a projection
             if not(isinstance(parent, Projection)):
+                # check if this is the right position for the projection
+                # if the operator below provides the same attributes, then do not add the projection here
+                if(isinstance(op, UnaryOperator)):   
+                    if(self._get_provided_attributes(op, parent) == self._get_provided_attributes(op.input, op)):
+                        return False
+                elif(isinstance(op, BinaryOperator)):
+                    if(self._get_provided_attributes(op, parent) == self._get_provided_attributes(op.l_input, op) 
+                       == self._get_provided_attributes(op.r_input, op)):
+                        return False
                 return True
         return False
     
@@ -258,15 +267,12 @@ class InsertProjection(Rule):
         # add this operator to the set of processed operators, such that it is not matched again
         self.processed_operators.add(op)
 
-        # compute from the required attributes of the parent what to project here
-        contained_attributes = set()
-        for p in parent.required_attributes:
-            if(op.has_attribute(p)):
-                contained_attributes.add(p)
+        # compute from the required attributes of the parent what to project here      
+        provided_attributes = self._get_provided_attributes(op, parent)
 
         # create the projection
-        proj = Projection(op, list(contained_attributes))
-        proj.required_attributes = contained_attributes
+        proj = Projection(op, list(provided_attributes))
+        proj.required_attributes = provided_attributes
         
         # put the projection
         if(isinstance(parent, BinaryOperator)):
@@ -276,6 +282,43 @@ class InsertProjection(Rule):
             self._put(parent, proj)
         
         return op, proj
+
+    def _get_provided_attributes(self, op, parent):
+        provided_attributes = set()
+        for p in parent.required_attributes:
+            if(op.has_attribute(p)):
+                provided_attributes.add(p)        
+        return provided_attributes
+            
+    def _annotate(self, op, parent):
+        self._annotate_node(op, parent)
+        
+        if(isinstance(op, UnaryOperator)):
+            self._annotate(op.input, op)
+        elif(isinstance(op, BinaryOperator)):
+            self._annotate(op.l_input, op)
+            self._annotate(op.r_input, op)
+        
+    def _annotate_node(self, op, parent):
+        """
+        Annotes the operator with the required operators
+
+        Args:
+            op(:obj: `Operator`): The operator to annotate
+            parent(:obj: `Operator`): The parent of op
+        """ 
+        # compute the attributes required by op 
+        required_attributes = self._get_required_attributes(op)
+        if (parent is None):
+            # there is no parent, so these attributes are all we require
+            op.required_attributes = required_attributes
+        else:
+            # there is a parent, so take the attributes it requires and compute which one op contains as well
+            relevant_parent_attributes = set()
+            for p in parent.required_attributes:
+                if(op.has_attribute(p)):
+                    relevant_parent_attributes.add(p)
+            op.required_attributes = relevant_parent_attributes | required_attributes
 
     def _get_required_attributes(self, op):
         """
@@ -306,26 +349,8 @@ class InsertProjection(Rule):
             attributes = attributes | op.r_attrs           
         
         # all other operators do not have requirements
-        
+  
         return attributes
             
-    def _annotate(self, op, parent):
-        """
-        Annotes the operator with the required operators
-
-        Args:
-            op(:obj: `Operator`): The operator to annotate
-            parent(:obj: `Operator`): The parent of op
-        """ 
-        # compute the attributes required by op 
-        required_attributes = self._get_required_attributes(op)
-        if (parent is None):
-            # there is no parent, so these attributes are all we require
-            op.required_attributes = required_attributes
-        else:
-            # there is a parent, so take the attributes it requires and compute which one op contains as well
-            relevant_parent_attributes = set()
-            for p in parent.required_attributes:
-                if(op.has_attribute(p)):
-                    relevant_parent_attributes.add(p)
-            op.required_attributes = relevant_parent_attributes | required_attributes
+            
+            
