@@ -11,8 +11,8 @@ def vis_network(nodes, edges, physics=False, height="400", filename=None, node_s
     html = """
     <html>
     <head>
-      <script type="text/javascript" src="./lib/vis-4.21.0/dist/vis.js"></script>
-      <link href="./lib/vis-4.21.0/dist/vis.css" rel="stylesheet" type="text/css">
+      <script type="text/javascript" src="../../third_party/vis_original/dist/vis.js"></script>
+      <link href="../../third_party/vis_original/dist/vis.css" rel="stylesheet" type="text/css">
     </head>
     <body>
 
@@ -93,13 +93,16 @@ def vis_network(nodes, edges, physics=False, height="400", filename=None, node_s
     """
 
     unique_id = str(uuid.uuid4())
-    html = html.format(id=unique_id, nodes=json.dumps(nodes), edges=json.dumps(edges), physics=json.dumps(physics), node_shape=json.dumps(node_shape), edge_width=json.dumps(edge_width))
+    html = html.format(id=unique_id, nodes=json.dumps(nodes), edges=json.dumps(edges),
+                       physics=json.dumps(physics), node_shape=json.dumps(node_shape), edge_width=json.dumps(edge_width))
 
     if filename is None:
         filename = "graph-{}.html".format(unique_id)
     elif not filename.endswith(".html"):
         filename = filename + ".html"
-
+    
+    filename = "pics/vis_generated/" + filename
+    
     file = open(filename, "w")
     file.write(html)
     file.close()

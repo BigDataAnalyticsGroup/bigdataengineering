@@ -1,0 +1,83 @@
+
+    <html>
+    <head>
+      <script type="text/javascript" src="../../third_party/vis_original/dist/vis.js"></script>
+      <link href="../../third_party/vis_original/dist/vis.css" rel="stylesheet" type="text/css">
+    </head>
+    <body>
+
+    <div id="df032bdb-f395-4eea-8f2a-0221fc2df090"></div>
+
+    <script type="text/javascript">
+      var nodes = [{"id": 9, "label": "T9", "group": "TRANSACTION", "title": "T9"}, {"id": 8, "label": "T8", "group": "TRANSACTION", "title": "T8"}, {"id": 7, "label": "T7", "group": "TRANSACTION", "title": "T7"}, {"id": 6, "label": "T6", "group": "TRANSACTION", "title": "T6"}, {"id": 5, "label": "T5", "group": "TRANSACTION", "title": "T5"}, {"id": 4, "label": "T4", "group": "TRANSACTION", "title": "T4"}, {"id": 3, "label": "T3", "group": "TRANSACTION", "title": "T3"}, {"id": 2, "label": "T2", "group": "TRANSACTION", "title": "T2"}];
+      var edges = [{"from": 5, "to": 4, "label": "PRECEDENCE"}, {"from": 3, "to": 2, "label": "PRECEDENCE"}, {"from": 2, "to": 9, "label": "PRECEDENCE"}, {"from": 2, "to": 6, "label": "PRECEDENCE"}, {"from": 6, "to": 5, "label": "PRECEDENCE"}, {"from": 3, "to": 7, "label": "PRECEDENCE"}, {"from": 9, "to": 6, "label": "PRECEDENCE"}, {"from": 3, "to": 8, "label": "PRECEDENCE"}, {"from": 4, "to": 7, "label": "PRECEDENCE"}, {"from": 2, "to": 4, "label": "PRECEDENCE"}, {"from": 8, "to": 7, "label": "PRECEDENCE"}, {"from": 8, "to": 9, "label": "PRECEDENCE"}];
+
+      var container = document.getElementById("df032bdb-f395-4eea-8f2a-0221fc2df090");
+
+      var data = {
+        nodes: nodes,
+        edges: edges
+      };
+
+      var options = {
+          nodes: {
+              shape: "circle",
+              size: 30,
+              font: {
+                  size: 16
+              }
+          },
+          edges: {
+              font: {
+                  size: 14,
+                  align: 'middle'
+              },
+              color: 'gray',
+              width: 3.0,
+              arrows: {
+                  to: {enabled: true, scaleFactor: 0.8}
+              },
+              smooth: {enabled: false}
+          },
+          physics: {
+              enabled: true,
+              barnesHut: {
+                  gravitationalConstant: -4000,
+                  centralGravity: 0.1,
+                  springLength: 170,
+                  springConstant: 0.04,
+                  damping: 0.09,
+                  avoidOverlap: 0.5
+              },
+              forceAtlas2Based: {
+                  gravitationalConstant: -50,
+                  centralGravity: 0.01,
+                  springConstant: 0.08,
+                  springLength: 170,
+                  damping: 0.4,
+                  avoidOverlap: 0
+              },
+              repulsion: {
+                  centralGravity: 0.1,
+                  springLength: 170,
+                  springConstant: 0.04,
+                  nodeDistance: 100,
+                  damping: 0.09
+              },
+              hierarchicalRepulsion: {
+                  centralGravity: 0.0,
+                  springLength: 170,
+                  springConstant: 0.01,
+                  nodeDistance: 120,
+                  damping: 0.09
+              },
+              solver: 'barnesHut'
+          }
+      };
+
+      var network = new vis.Network(container, data, options);
+
+    </script>
+    </body>
+    </html>
+    
