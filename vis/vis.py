@@ -4,6 +4,7 @@ import uuid
 
 def vis_network(nodes, edges, physics=False, height="400", filename=None, node_shape='dot', edge_width=1.0):
     # slightly adapted version compared to the original by Nicole White
+    # https://github.com/nicolewhite/neo4j-jupyter/blob/master/scripts/vis.py
     # height parameter added to allow for larger IFrames
     # filename parameter added to determine file location
     # added check that filename ends with .html
