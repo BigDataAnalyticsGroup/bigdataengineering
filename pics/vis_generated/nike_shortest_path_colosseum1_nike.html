@@ -1,0 +1,83 @@
+
+    <html>
+    <head>
+      <script type="text/javascript" src="../../third_party/vis_original/dist/vis.js"></script>
+      <link href="../../third_party/vis_original/dist/vis.css" rel="stylesheet" type="text/css">
+    </head>
+    <body>
+
+    <div id="17c65169-f41e-4c76-b3d0-e2d4c6d51270"></div>
+
+    <script type="text/javascript">
+      var nodes = [{"id": "81059729", "label": "Colosseum 1", "group": "Address", "title": "Colosseum 1"}, {"id": "80107002", "label": "NIKE Sphere C.V.", "group": "Officer", "title": "NIKE Sphere C.V."}, {"id": "82004146", "label": "Nike Finance Ltd.", "group": "Entity", "title": "Nike Finance Ltd."}, {"id": "81029530", "label": "One Bowerman Drive", "group": "Address", "title": "One Bowerman Drive"}, {"id": "80106999", "label": "NIKE, Inc.", "group": "Officer", "title": "NIKE, Inc."}];
+      var edges = [{"from": "80107002", "to": "81059729", "label": "REGISTERED_ADDRESS"}, {"from": "80107002", "to": "82004146", "label": "OFFICER_OF"}, {"from": "82004146", "to": "81029530", "label": "REGISTERED_ADDRESS"}, {"from": "80106999", "to": "81029530", "label": "REGISTERED_ADDRESS"}];
+
+      var container = document.getElementById("17c65169-f41e-4c76-b3d0-e2d4c6d51270");
+
+      var data = {
+        nodes: nodes,
+        edges: edges
+      };
+
+      var options = {
+          nodes: {
+              shape: "dot",
+              size: 30,
+              font: {
+                  size: 16
+              }
+          },
+          edges: {
+              font: {
+                  size: 14,
+                  align: 'middle'
+              },
+              color: 'gray',
+              width: 1.0,
+              arrows: {
+                  to: {enabled: true, scaleFactor: 0.8}
+              },
+              smooth: {enabled: false}
+          },
+          physics: {
+              enabled: true,
+              barnesHut: {
+                  gravitationalConstant: -4000,
+                  centralGravity: 0.1,
+                  springLength: 170,
+                  springConstant: 0.04,
+                  damping: 0.09,
+                  avoidOverlap: 0.5
+              },
+              forceAtlas2Based: {
+                  gravitationalConstant: -50,
+                  centralGravity: 0.01,
+                  springConstant: 0.08,
+                  springLength: 170,
+                  damping: 0.4,
+                  avoidOverlap: 0
+              },
+              repulsion: {
+                  centralGravity: 0.1,
+                  springLength: 170,
+                  springConstant: 0.04,
+                  nodeDistance: 100,
+                  damping: 0.09
+              },
+              hierarchicalRepulsion: {
+                  centralGravity: 0.0,
+                  springLength: 170,
+                  springConstant: 0.01,
+                  nodeDistance: 120,
+                  damping: 0.09
+              },
+              solver: 'barnesHut'
+          }
+      };
+
+      var network = new vis.Network(container, data, options);
+
+    </script>
+    </body>
+    </html>
+    

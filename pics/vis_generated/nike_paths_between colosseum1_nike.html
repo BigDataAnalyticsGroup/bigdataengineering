@@ -1,0 +1,83 @@
+
+    <html>
+    <head>
+      <script type="text/javascript" src="../../third_party/vis_original/dist/vis.js"></script>
+      <link href="../../third_party/vis_original/dist/vis.css" rel="stylesheet" type="text/css">
+    </head>
+    <body>
+
+    <div id="6f913b30-d4f7-4924-8a71-60467d815b52"></div>
+
+    <script type="text/javascript">
+      var nodes = [{"id": "80145773", "label": "Woodruff - Robert", "group": "Officer", "title": "Woodruff - Robert"}, {"id": "80036412", "label": "Blair - Donald Warren", "group": "Officer", "title": "Blair - Donald Warren"}, {"id": "81059729", "label": "Colosseum 1", "group": "Address", "title": "Colosseum 1"}, {"id": "80000440", "label": "NIKE INTERNATIONAL LTD.", "group": "Officer", "title": "NIKE INTERNATIONAL LTD."}, {"id": "80128240", "label": "Stewart - Lindsay D.", "group": "Officer", "title": "Stewart - Lindsay D."}, {"id": "80038456", "label": "Lines - David R", "group": "Officer", "title": "Lines - David R"}, {"id": "80039002", "label": "Faries - Timothy Carrick", "group": "Officer", "title": "Faries - Timothy Carrick"}, {"id": "80007949", "label": "NIKE Lavadome", "group": "Officer", "title": "NIKE Lavadome"}, {"id": "80050944", "label": "Coburn III - John F", "group": "Officer", "title": "Coburn III - John F"}, {"id": "80074144", "label": "Hall - Kelly K", "group": "Officer", "title": "Hall - Kelly K"}, {"id": "80007954", "label": "NIKE Huarache", "group": "Officer", "title": "NIKE Huarache"}, {"id": "80128342", "label": "Stilwell - Marcia", "group": "Officer", "title": "Stilwell - Marcia"}, {"id": "82004146", "label": "Nike Finance Ltd.", "group": "Entity", "title": "Nike Finance Ltd."}, {"id": "82007949", "label": "NIKE Lavadome", "group": "Entity", "title": "NIKE Lavadome"}, {"id": "80106994", "label": "NIKE Elevate C.V.", "group": "Officer", "title": "NIKE Elevate C.V."}, {"id": "80106996", "label": "NIKE Glide C.V.", "group": "Officer", "title": "NIKE Glide C.V."}, {"id": "80106999", "label": "NIKE, Inc.", "group": "Officer", "title": "NIKE, Inc."}, {"id": "82007953", "label": "NIKE Cortez", "group": "Entity", "title": "NIKE Cortez"}, {"id": "80087509", "label": "Knight - Philip H.", "group": "Officer", "title": "Knight - Philip H."}, {"id": "80107002", "label": "NIKE Sphere C.V.", "group": "Officer", "title": "NIKE Sphere C.V."}, {"id": "80107000", "label": "NIKE International Holding, Inc.", "group": "Officer", "title": "NIKE International Holding, Inc."}, {"id": "82000440", "label": "NIKE INTERNATIONAL LTD.", "group": "Entity", "title": "NIKE INTERNATIONAL LTD."}, {"id": "80008258", "label": "NIKE Pegasus", "group": "Officer", "title": "NIKE Pegasus"}, {"id": "80106997", "label": "Nike Group", "group": "Intermediary", "title": "Nike Group"}, {"id": "82003583", "label": "Air Max Limited", "group": "Entity", "title": "Air Max Limited"}, {"id": "80088311", "label": "Krane - Hilary K", "group": "Officer", "title": "Krane - Hilary K"}, {"id": "80008380", "label": "NIKE Waffle", "group": "Officer", "title": "NIKE Waffle"}];
+      var edges = [{"from": "80036412", "to": "82003583", "label": "OFFICER_OF"}, {"from": "80036412", "to": "82003583", "label": "OFFICER_OF"}, {"from": "80036412", "to": "82003583", "label": "OFFICER_OF"}, {"from": "80036412", "to": "82003583", "label": "OFFICER_OF"}, {"from": "80007954", "to": "82004146", "label": "OFFICER_OF"}, {"from": "80007954", "to": "82000440", "label": "OFFICER_OF"}, {"from": "80050944", "to": "82000440", "label": "OFFICER_OF"}, {"from": "80050944", "to": "82000440", "label": "OFFICER_OF"}, {"from": "80074144", "to": "82000440", "label": "OFFICER_OF"}, {"from": "80074144", "to": "82000440", "label": "OFFICER_OF"}, {"from": "80107002", "to": "82004146", "label": "OFFICER_OF"}, {"from": "80106996", "to": "81059729", "label": "REGISTERED_ADDRESS"}, {"from": "80087509", "to": "82003583", "label": "OFFICER_OF"}, {"from": "80087509", "to": "82003583", "label": "OFFICER_OF"}, {"from": "80036412", "to": "82000440", "label": "OFFICER_OF"}, {"from": "80036412", "to": "82000440", "label": "OFFICER_OF"}, {"from": "80036412", "to": "82000440", "label": "OFFICER_OF"}, {"from": "80036412", "to": "82000440", "label": "OFFICER_OF"}, {"from": "80036412", "to": "82000440", "label": "OFFICER_OF"}, {"from": "80106996", "to": "82003583", "label": "OFFICER_OF"}, {"from": "80039002", "to": "82000440", "label": "OFFICER_OF"}, {"from": "80107000", "to": "82007949", "label": "OFFICER_OF"}, {"from": "80038456", "to": "82000440", "label": "OFFICER_OF"}, {"from": "80106997", "to": "82000440", "label": "CONNECTED_TO"}, {"from": "80036412", "to": "82004146", "label": "OFFICER_OF"}, {"from": "80106997", "to": "82007953", "label": "CONNECTED_TO"}, {"from": "80107002", "to": "81059729", "label": "REGISTERED_ADDRESS"}, {"from": "80036412", "to": "82004146", "label": "OFFICER_OF"}, {"from": "80036412", "to": "82004146", "label": "OFFICER_OF"}, {"from": "80106999", "to": "82007949", "label": "OFFICER_OF"}, {"from": "80008258", "to": "82000440", "label": "OFFICER_OF"}, {"from": "80145773", "to": "82003583", "label": "OFFICER_OF"}, {"from": "80088311", "to": "82003583", "label": "OFFICER_OF"}, {"from": "80088311", "to": "82003583", "label": "OFFICER_OF"}, {"from": "80088311", "to": "82003583", "label": "OFFICER_OF"}, {"from": "80106994", "to": "82003583", "label": "OFFICER_OF"}, {"from": "80145773", "to": "82000440", "label": "OFFICER_OF"}, {"from": "80145773", "to": "82000440", "label": "OFFICER_OF"}, {"from": "80145773", "to": "82000440", "label": "OFFICER_OF"}, {"from": "80039002", "to": "82004146", "label": "OFFICER_OF"}, {"from": "80050944", "to": "82004146", "label": "OFFICER_OF"}, {"from": "80050944", "to": "82004146", "label": "OFFICER_OF"}, {"from": "80074144", "to": "82004146", "label": "OFFICER_OF"}, {"from": "80106997", "to": "82004146", "label": "CONNECTED_TO"}, {"from": "80000440", "to": "82000440", "label": "SAME_NAME_AS"}, {"from": "80128342", "to": "82000440", "label": "OFFICER_OF"}, {"from": "80128342", "to": "82000440", "label": "OFFICER_OF"}, {"from": "80128342", "to": "82000440", "label": "OFFICER_OF"}, {"from": "80128342", "to": "82000440", "label": "OFFICER_OF"}, {"from": "80128240", "to": "82000440", "label": "OFFICER_OF"}, {"from": "80128240", "to": "82000440", "label": "OFFICER_OF"}, {"from": "80106997", "to": "82007949", "label": "CONNECTED_TO"}, {"from": "80107000", "to": "82004146", "label": "OFFICER_OF"}, {"from": "80039002", "to": "82003583", "label": "OFFICER_OF"}, {"from": "80106994", "to": "82000440", "label": "OFFICER_OF"}, {"from": "80000440", "to": "82004146", "label": "OFFICER_OF"}, {"from": "80008380", "to": "82000440", "label": "OFFICER_OF"}, {"from": "80128342", "to": "82003583", "label": "OFFICER_OF"}, {"from": "80128342", "to": "82003583", "label": "OFFICER_OF"}, {"from": "80007949", "to": "82003583", "label": "OFFICER_OF"}, {"from": "80050944", "to": "82003583", "label": "OFFICER_OF"}, {"from": "80050944", "to": "82003583", "label": "OFFICER_OF"}, {"from": "80074144", "to": "82003583", "label": "OFFICER_OF"}, {"from": "80007949", "to": "82004146", "label": "OFFICER_OF"}, {"from": "80008380", "to": "82004146", "label": "OFFICER_OF"}, {"from": "80087509", "to": "82004146", "label": "OFFICER_OF"}, {"from": "80106999", "to": "82000440", "label": "OFFICER_OF"}, {"from": "80088311", "to": "82004146", "label": "OFFICER_OF"}, {"from": "80088311", "to": "82004146", "label": "OFFICER_OF"}, {"from": "80106999", "to": "82007953", "label": "OFFICER_OF"}, {"from": "80008258", "to": "82003583", "label": "OFFICER_OF"}, {"from": "80007949", "to": "82007953", "label": "OFFICER_OF"}, {"from": "80128240", "to": "82003583", "label": "OFFICER_OF"}, {"from": "80128240", "to": "82003583", "label": "OFFICER_OF"}, {"from": "80107000", "to": "82007953", "label": "OFFICER_OF"}, {"from": "80007949", "to": "82007949", "label": "SAME_NAME_AS"}, {"from": "80038456", "to": "82004146", "label": "OFFICER_OF"}, {"from": "80088311", "to": "82000440", "label": "OFFICER_OF"}, {"from": "80088311", "to": "82000440", "label": "OFFICER_OF"}, {"from": "80128342", "to": "82004146", "label": "OFFICER_OF"}, {"from": "80128342", "to": "82004146", "label": "OFFICER_OF"}, {"from": "80145773", "to": "82004146", "label": "OFFICER_OF"}, {"from": "80128240", "to": "82004146", "label": "OFFICER_OF"}, {"from": "80128240", "to": "82004146", "label": "OFFICER_OF"}, {"from": "80106997", "to": "82003583", "label": "CONNECTED_TO"}, {"from": "80087509", "to": "82000440", "label": "OFFICER_OF"}, {"from": "80087509", "to": "82000440", "label": "OFFICER_OF"}, {"from": "80000440", "to": "82003583", "label": "OFFICER_OF"}, {"from": "80008258", "to": "82004146", "label": "OFFICER_OF"}, {"from": "80007949", "to": "82000440", "label": "OFFICER_OF"}, {"from": "80038456", "to": "82003583", "label": "OFFICER_OF"}];
+
+      var container = document.getElementById("6f913b30-d4f7-4924-8a71-60467d815b52");
+
+      var data = {
+        nodes: nodes,
+        edges: edges
+      };
+
+      var options = {
+          nodes: {
+              shape: "dot",
+              size: 30,
+              font: {
+                  size: 16
+              }
+          },
+          edges: {
+              font: {
+                  size: 14,
+                  align: 'middle'
+              },
+              color: 'gray',
+              width: 1.0,
+              arrows: {
+                  to: {enabled: true, scaleFactor: 0.8}
+              },
+              smooth: {enabled: false}
+          },
+          physics: {
+              enabled: true,
+              barnesHut: {
+                  gravitationalConstant: -4000,
+                  centralGravity: 0.1,
+                  springLength: 170,
+                  springConstant: 0.04,
+                  damping: 0.09,
+                  avoidOverlap: 0.5
+              },
+              forceAtlas2Based: {
+                  gravitationalConstant: -50,
+                  centralGravity: 0.01,
+                  springConstant: 0.08,
+                  springLength: 170,
+                  damping: 0.4,
+                  avoidOverlap: 0
+              },
+              repulsion: {
+                  centralGravity: 0.1,
+                  springLength: 170,
+                  springConstant: 0.04,
+                  nodeDistance: 100,
+                  damping: 0.09
+              },
+              hierarchicalRepulsion: {
+                  centralGravity: 0.0,
+                  springLength: 170,
+                  springConstant: 0.01,
+                  nodeDistance: 120,
+                  damping: 0.09
+              },
+              solver: 'barnesHut'
+          }
+      };
+
+      var network = new vis.Network(container, data, options);
+
+    </script>
+    </body>
+    </html>
+    
