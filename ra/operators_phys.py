@@ -1,18 +1,22 @@
-# https://docs.python.org/3.7/library/operator.html
-# used here to be able to use certain built-in python operators as function parameters
 import operator
+
 from graphviz import Digraph, Source
-from ra.schema_utils import build_schema
-from ra.relation import Relation
-from ra.operators_log import *
 from enum import Enum
 
+from ra.utils import build_schema
+from ra.relation import Relation
+from ra.operators_log import *
+
+
+#########
+# Costs #
+#########
 
 class Costs:
     class CostModel(Enum):
         IO = 0
         Main_Memory = 1
-    
+
     """An interface allowing physical operators to return cost estimates.
     """
 
@@ -21,53 +25,58 @@ class Costs:
         """returns the estimated costs of this physical operator.
         """
         pass
-    
+
     def estimatedResultSize(self):
         """returns the estimated number of result tuples returned by this physical operator.
         """
         pass
 
 
+######################
+# Physical Operators #
+######################
+
 class SetOperator_HashBased(SetOperator, Costs):
     def _dot(self, graph, prefix):
         return super()._dot(graph, prefix, "_HashBased")
-    
+
     def evaluate(self):
         """Performs a set operation on its inputs."""
         # evaluate child nodes
         l_eval_input = self.l_input.evaluate()
         r_eval_input = self.r_input.evaluate()
-        
+
         new_relation = Relation("Result", self.get_schema())
         # add tuples to new relation
         for tup in self.operator(l_eval_input.tuples, r_eval_input.tuples):
             new_relation.add_tuple(tup)
-        return new_relation    
-    
+        return new_relation
+
     def getCosts(size):
         pass
-            
+
     def estimatedResultSize():
         pass
-    
+
+
 class LeafRelation(LeafOperator):
     def evaluate(self):
         """Evaluates the operator by returning the relation held by the leaf node."""
         return self.relation
-    
-    
+
+
 class Selection_ScanBased(Selection):
     def __str__(self):
-        return "σ_ScanBased_[{}]({})".format(self.predicate, self.input)
-    
+        return f'σ_ScanBased[{self.predicate}]({self.input})'
+
     def _dot(self, graph, prefix):
         return super()._dot(graph, prefix, "σ_ScanBased[{}]")
-    
+
     def evaluate(self):
         """Performs the selection by evaluating the predicate on its input."""
         # evaluate child node
         eval_input = self.input.evaluate()
-        
+
         # build empty relation with same schema as input
         new_relation = Relation("Result", self.get_schema())
         # check predicate for each tuple in input
@@ -77,23 +86,24 @@ class Selection_ScanBased(Selection):
                 new_relation.add_tuple(tup)  # implicitly handles duplicate elimination
         return new_relation
 
+
 class Selection_IndexBased(Selection):
     def __str__(self):
-        return "σ_IndexBased_[{}]({})".format(self.predicate, self.input)
+        return f'σ_IndexBased_[{self.predicate}]({self.input})'
 
     def _dot(self, graph, prefix):
-        return super()._dot(graph, prefix, "σ_IndexBased[{}]")   
+        return super()._dot(graph, prefix, "σ_IndexBased[{}]")
 
     def evaluate(self):
-        """Performs the selection by evaluating the predicate on its input, 
+        """Performs the selection by evaluating the predicate on its input,
            which must be a relation containing an index on the selected predicate.
-        
+
         Note:
             Currently, this access method does not use the index, but performs the access via scan.
         """
         # evaluate child node
         eval_input = self.input.evaluate()
-        
+
         # build empty relation with same schema as input
         new_relation = Relation("Result", self.get_schema())
         # check predicate for each tuple in input
@@ -102,7 +112,7 @@ class Selection_IndexBased(Selection):
             if eval(self.predicate, Selection._locals_dict(tup, eval_input.attributes)):
                 new_relation.add_tuple(tup)  # implicitly handles duplicate elimination
         return new_relation
-        
+
     def estimatedResultSize(self):
         # TODO: replace by estimation
         return len(self.evaluate())
@@ -110,37 +120,37 @@ class Selection_IndexBased(Selection):
 
 class Projection_ScanBased(Projection):
     def __str__(self):
-        return "π_ScanBased_{}({})".format(self.attributes, self.input)
-    
+        return f'π_ScanBased[{", ".join(self.attributes)}]({self.input})'
+
     def _dot(self, graph, prefix):
-        return super()._dot(graph, prefix, "π_ScanBased{}")
-    
+        return super()._dot(graph, prefix, 'π_ScanBased[{}]')
+
     def evaluate(self):
         """Performs the projection."""
         # evaluate child node
         eval_input = self.input.evaluate()
-        
+
         # build new empty relation with the projected attributes
         new_relation = Relation("Result", self.get_schema())
-        
+
         # add tuples to new relation
         attr_indexes = [*map(eval_input.get_attribute_index, self.attributes)]
         for tup in eval_input.tuples:
             new_tup = tuple(tup[i] for i in attr_indexes)
             new_relation.add_tuple(new_tup)  # automatically eliminates duplicates
         return new_relation
-    
+
 
 class Cartesian_Product_NestedLoop(Cartesian_Product):
     def _dot(self, graph, prefix):
         return super()._dot(graph, prefix, "×_NestedLoop")
-    
+
     def evaluate(self):
         """Performs a cartesian product on its inputs."""
         # evaluate child nodes
         l_eval_input = self.l_input.evaluate()
         r_eval_input = self.r_input.evaluate()
-        
+
         new_relation = Relation("Result", self.get_schema())
         # insert cartesian product of tuples
         for tup1 in l_eval_input.tuples:
@@ -182,10 +192,10 @@ class Difference_HashBased(SetOperator_HashBased):
         super().__init__(l_input, r_input, operator.sub, "−")
 
 
-class Renaming_Relation_ScanBased(Renaming_Relation):  
+class Renaming_Relation_ScanBased(Renaming_Relation):
     def _dot(self, graph, prefix):
         return super()._dot(graph, prefix, "ρ_ScanBased[{}]")
-    
+
     def evaluate(self):
         """Performs the renaming."""
         # evaluate child node
@@ -194,13 +204,13 @@ class Renaming_Relation_ScanBased(Renaming_Relation):
         # add all existing tuples
         for tup in eval_input.tuples:
             new_relation.add_tuple(tup)
-        return new_relation 
-    
-    
+        return new_relation
+
+
 class Renaming_Attributes_ScanBased(Renaming_Attributes):
     def _dot(self, graph, prefix):
         return super()._dot(graph, prefix, "ρ_ScanBased[{}]")
-        
+
     def evaluate(self):
         # evaluate child node
         eval_input = self.input.evaluate()
@@ -214,13 +224,13 @@ class Renaming_Attributes_ScanBased(Renaming_Attributes):
 class Theta_Join_NestedLoop(Theta_Join):
     def _dot(self, graph, prefix):
         return super()._dot(graph, prefix, "⋈_NestedLoop[{}]")
-        
+
     def evaluate(self):
         """Performs a theta join on its inputs."""
         # evaluate child nodes
         l_eval_input = self.l_input.evaluate()
         r_eval_input = self.r_input.evaluate()
-        
+
         new_relation = Relation("Result", self.get_schema())
         # insert cartesian product of tuples
         for tup1 in l_eval_input.tuples:
@@ -229,54 +239,12 @@ class Theta_Join_NestedLoop(Theta_Join):
                 if eval(self.theta, Selection._locals_dict(potential_tup, new_relation.attributes)):
                     new_relation.add_tuple(potential_tup)  # implicitly handles duplicate elimination
         return new_relation
-    
 
-class Equi_Join_HashBased(Equi_Join):
-    def _dot(self, graph, prefix):
-        return super()._dot(graph, prefix, "⋈_HashBased{},{}")
-        
-    def evaluate(self):
-        l_eval_input = self.l_input.evaluate()
-        r_eval_input = self.r_input.evaluate()
 
-        # build new relation
-        new_name = str(self)
-        new_relation = Relation(new_name, self.get_schema())
-        
-        # compute attribute indexes
-        l_idxs = [l_eval_input.get_attribute_index(attr) for attr in self.l_attrs]
-        r_idxs = [r_eval_input.get_attribute_index(attr) for attr in self.r_attrs]
-
-        # build hash table on left relation
-        hash_table = dict()
-        for tup in l_eval_input.tuples:
-            join_pred = tuple([tup[i] for i in l_idxs])
-            bucket = hash_table.get(join_pred, [])
-            hash_table[join_pred] = bucket+[tup]
-
-        # probe right relation against hash table
-        result_tups = set()
-        for tup_r in r_eval_input.tuples:
-            join_pred = tuple([tup_r[i] for i in r_idxs])
-            bucket = hash_table.get(join_pred, [])
-            for tup_l in bucket:
-                # add result tuples to relation
-                new_relation.add_tuple(tup_l+tup_r)
-
-        return new_relation
-
-    def _dot(self, graph, prefix):
-        # build name and label and call helper function
-        node_name = prefix + 'Joi'
-        node_label = "⋈_{},{}".format(self.l_attrs, self.r_attrs)
-        self._dot_helper(graph, prefix, node_name, node_label)
-        return node_name
-
-    
 class Grouping_HashBased(Grouping):
     def _dot(self, graph, prefix):
-        return super()._dot(graph, prefix, "γ_HashBased{} {}")
-    
+        return super()._dot(graph, prefix, "γ_HashBased[{}]")
+
     def evaluate(self):
         """Performs grouping and aggregation on its inputs."""
         # evaluate input
@@ -311,10 +279,15 @@ class Grouping_HashBased(Grouping):
             result_tup = key  # first part of result tuple is the group
             group = groups[key]  # get list of group members to compute aggregations on
             # compute each aggregate
-            for func, attr in self.aggregations:
-                idx = eval_input.get_attribute_index(attr)  # position of attribute within each tuple
-                agg_result = func([x[idx] for x in group])  # apply aggregation function to list of attributes
-                result_tup += (agg_result, )  # append aggregation result to result tuple
+            for fn, attr in self.aggregations:
+                if fn == len and attr == "*":
+                    agg_result = len(group)  # apply aggregation function to list of attributes
+                    result_tup += (agg_result, )  # append aggregation result to result tuple
+                else:
+                    idx = eval_input.get_attribute_index(attr)  # position of attribute within each tuple
+                    agg_result = fn([x[idx] for x in group])  # apply aggregation function to list of attributes
+                    if fn == statistics.mean:
+                        agg_result = float(agg_result)
+                    result_tup += (agg_result, )  # append aggregation result to result tuple
             results.add(result_tup)
         return results
-    

@@ -1,6 +1,6 @@
 from csv import reader
-from .relation import Relation
-from .schema_utils import build_schema
+from .relation import Relation, build_schema
+
 
 ###############
 # CSV Parsing #
@@ -15,7 +15,7 @@ def load_csv(path, name, delimiter=',', quotechar='"'):
         name (:obj: `string`): the name of the relation to be created from the .csv file.
         delimiter (:obj: `string`): The delimiter used in the .csv file, optional.
         quotechar (:obj: `string`): The char used for quotes in the .csv file, optional.
-        
+
     Returns:
         A new relation object.
     """
@@ -37,16 +37,15 @@ def load_csv(path, name, delimiter=',', quotechar='"'):
             # insert tuples
             tup = build_tuple(row, domains)
             relation.add_tuple(tup)
-        # return relation
         return relation
-    
+
 def get_domains(row):
     """
     Extracts the domain types from a row in a .csv file
-    
+
     Args:
         row (`list` of :obj: `string): a row from the .csv reader.
-    
+
     Retruns:
         List of domain types for the provided row.
     """
@@ -71,7 +70,7 @@ def build_tuple(row, domains):
     Args:
         row (`list` of :obj: `string`): `string` representation of the values a tuple is built from.
         domains (`list` of :obj: `type`): `type` of the values the tuple is built from.
-    
+
     Returns:
         Tuple of accordingly typed values from the row.
     """
@@ -88,7 +87,7 @@ def isfloat(input):
 
     Args:
         input (:obj: `string`): the string to be tested.
-    
+
     Returns:
         True if the input can be interpreted as float, False otherwise.
     """
@@ -97,3 +96,20 @@ def isfloat(input):
         return True
     except ValueError:
         return False
+
+
+#################
+# Miscellaneous #
+#################
+
+def str_to_list(string):
+    """
+    Parses a comma separated string into a list of strings.
+
+    Args:
+        string (:obj: `string`): The string, comma separated.
+
+    Returns:
+        A list of strings.
+    """
+    return list(map(lambda x: x.strip(), string.split(',')))

@@ -1,46 +1,47 @@
-# https://docs.python.org/3.7/library/operator.html
-# used here to be able to use certain built-in python operators as function parameters
-import operator
 from ra.operators_log import *
-from ra.operators_phys_relation import *
+from ra.operators_phys import *
 
-# Rule Base Class:
+
+##############
+# Base Class #
+##############
+
 class Rule():
     """A rule that is used by the optimizer to modify the logical operator tree
     """
     def __init__(self, root):
         self.root = root
-        
+
     def __str__(self):
         pass
-            
+
     def _match(self, op, parent):
         """
         Matches a part of the operator tree
-        
+
         Args:
-            op (:obj: Operator): the operator that is currently matched 
-            parent (:obj: Operator): the direct parent of op 
-        
+            op (:obj: Operator): the operator that is currently matched
+            parent (:obj: Operator): the direct parent of op
+
         Returns:
             True, if op matches the specified criteria
         """
         pass
-    
+
     def _modify(self, op, parent):
         """
         Modifies the operator tree in the specified way, after a match has happened
-        
+
         Args:
             op (:obj: Operator): the operator that has been matched
-            parent (:obj: Operator): the direct parent of op 
-        
+            parent (:obj: Operator): the direct parent of op
+
         Returns:
             cont_op (:obj: Operator): the operator to continue matching or None, if optimzation should terminate
             cont_parent (:obj: Operator): the parent of the operator to continue matching
         """
-        pass    
-    
+        pass
+
     def _replace(self, parent, top_of_old, bottom_of_old, top_of_new, bottom_of_new):
         """Replace a part of the operator tree by another operator tree
 
@@ -68,8 +69,8 @@ class Rule():
         elif(parent is None):
             # we replaced the root, so update it
             self.root = top_of_new
-                
-        if(bottom_of_old is not None and bottom_of_new is not None):        
+
+        if(bottom_of_old is not None and bottom_of_new is not None):
             # link bottom
             if(isinstance(bottom_of_old, UnaryOperator)):
                 # bottom_of_old is unary, so bottom_of_new has to be unary as well
@@ -80,7 +81,7 @@ class Rule():
                 assert(isinstance(bottom_of_new, BinaryOperator))
                 bottom_of_new.l_input = bottom_of_old.l_input
                 bottom_of_new.r_input = bottom_of_old.r_input
-    
+
     def _delete(self, parent, op):
         """Deletes an operator from the operator tree
         Note:
@@ -92,7 +93,7 @@ class Rule():
         """
         assert(isinstance(op, UnaryOperator))
         child = op.input
-        
+
         if(isinstance(parent, UnaryOperator)):
             # old parent is unary
             parent.input = child
@@ -103,11 +104,11 @@ class Rule():
                 parent.l_input = child
             else:
                 parent.r_input = child
-        
+
         if(parent is None):
             # we deleted the root, so update it
             self.root = child
-            
+
     def _put(self, new_parent, op, left = True):
         """Inserts an operator into the operator tree
         Note:
@@ -116,7 +117,7 @@ class Rule():
         Args:
             new_parent (:obj: Operator): The new parent of the operator to insert
             op (:obj: Operator): The operator to insert
-            left (Boolean): If new_parent is binary, denote to which side to put the operator to insert 
+            left (Boolean): If new_parent is binary, denote to which side to put the operator to insert
         """
         assert(isinstance(op, UnaryOperator))
         if(isinstance(new_parent, UnaryOperator)):
@@ -134,7 +135,7 @@ class Rule():
                 grandchild = new_parent.r_input
                 new_parent.r_input = op
                 op.input = grandchild
-        
+
     def _move(self, old_parent, op, new_parent, left = True):
         """Moves an operator within the operator tree
         Note:
@@ -143,24 +144,23 @@ class Rule():
         Args:
             old_parent (:obj: Operator): The old parent of the operator to move
             op (:obj: Operator): The operator to move
-            new_parent (:obj: Operator): The new parent of the operator to move            
-            left (Boolean): If new_parent is binary, denote to which side to put the operator to insert 
+            new_parent (:obj: Operator): The new parent of the operator to move
+            left (Boolean): If new_parent is binary, denote to which side to put the operator to insert
         """
         # only supported for unary operators
         assert(isinstance(op, UnaryOperator))
         child = op.input
-        
-        # 1. link old parent to child, essentially by removing op 
+
+        # 1. link old parent to child, essentially by removing op
         self._delete(old_parent, op)
-        
+
         # 2. link new_parent to op and op to the respective grandchild
-        self._put(new_parent, op, left)         
-                
-    
+        self._put(new_parent, op, left)
+
     def optimize(self, op, parent = None):
         """
         Optimizes the tree rooted at op according to the rule
-        
+
         Args:
             op (:obj: Operator): the root of the operator tree to optimize by this rule
             parent (:obj: Operator): the direct parent of op, None by default
@@ -173,7 +173,7 @@ class Rule():
             # cont_parent: is the parent operator of cont_op in the modified tree
             cont_op, cont_parent = self._modify(op, parent)
             modified = True
-            # the modification returned at which operator to continue, possibly from the root again 
+            # the modification returned at which operator to continue, possibly from the root again
             if(cont_op == None):
                 # Do not continue at all, so apparently, we are done
                 return modified
@@ -186,5 +186,5 @@ class Rule():
             elif(isinstance(op, BinaryOperator)):
                 modified = self.optimize(op.l_input, op) or modified
                 modified = self.optimize(op.r_input, op) or modified
-                
+
         return modified

@@ -1,9 +1,15 @@
-# https://docs.python.org/3.7/library/operator.html
-# used here to be able to use certain built-in python operators as function parameters
 import operator
+import statistics
+
 from graphviz import Digraph, Source
-from ra.schema_utils import build_schema
+
+from ra.utils import build_schema, str_to_list
 from ra.relation import Relation
+
+
+################
+# Base Classes #
+################
 
 class Operator:
     """Abstract base class for an operator in an operator tree."""
@@ -27,16 +33,18 @@ class Operator:
 
     def get_schema(self):
         """Returns the schema produced by this operator.
+
         Note:
             Inner nodes also call `get_schema` on their childern.
-        
+
         Returns:
             A list of (attribute_name, attribute_domain) pairs representing the schema.
         """
         pass
-       
+
     def _dot(self, graph, prefix):
         """Adds a node representing the operator to the graph.
+
         Note:
             Inner nodes also call `dot` on their children and add edges
 
@@ -48,17 +56,17 @@ class Operator:
             The name of the node added, s.t. parents can add edges from the inserted node.
         """
         pass
-    
+
     def set_dot_attrs(self, attrs):
-        """Sets the colors of the node for the next call of get_graph()
-        
+        """Sets the colors of the node for the next call of `get_graph()`.
+
         Args:
             attrs (dict of str: str): Additional attributes for dot node.
         """
         pass
 
     def close(self):
-        """Cleans up resources used by this operator. Rarely useful and/or required in Python
+        """Cleans up resources used by this operator. Rarely useful and/or required in Python.
         """
         pass
 
@@ -67,6 +75,7 @@ class Operator:
         """
         schema = self.get_schema()
         return attribute in [attr[0] for attr in schema]
+
 
 class UnaryOperator(Operator):
     """Abstract base class for an internal node performing a unary operation.
@@ -88,12 +97,13 @@ class UnaryOperator(Operator):
         child_name = self.input._dot(graph, prefix+'I')
         # add edge from child to this node
         graph.edge(child_name, name)
-    
+
     def set_dot_attrs(self, attrs):
         self.dot_attrs = attrs
-                       
+
     def close(self):
         self.input.close()
+
 
 class BinaryOperator(Operator):
     """Abstract base class for an internal node performing a binary operation.
@@ -122,7 +132,7 @@ class BinaryOperator(Operator):
 
     def set_dot_attrs(self, attrs):
         self.dot_attrs = attrs
-        
+
     def close(self):
         self.l_input.close()
         self.r_input.close()
@@ -144,7 +154,7 @@ class SetOperator(BinaryOperator):
         self.set_dot_attrs({'color':'#FF7E79', 'style': 'filled'})
 
     def __str__(self):
-        return "({}) {} ({})".format(self.l_input, self.symbol, self.r_input)
+        return f'({self.l_input}) {self.symbol} ({self.r_input})'
 
     def _dot(self, graph, prefix, caption=""):
         # build name and label and call helper function
@@ -152,16 +162,17 @@ class SetOperator(BinaryOperator):
         node_label = self.symbol + caption
         self._dot_helper(graph, prefix, node_name, node_label)
         return node_name
-    
+
     def get_schema(self):
         # evaluate child nodes
         l_eval_input = self.l_input.get_schema()
         r_eval_input = self.r_input.get_schema()
-        
+
         # integrity checks (attributes and domains must be identical)
         assert l_eval_input == r_eval_input
-        return l_eval_input      
-    
+        return l_eval_input
+
+
 class LeafOperator(Operator):
     """Base class for a leaf node of an operator tree.
 
@@ -172,7 +183,7 @@ class LeafOperator(Operator):
     def __init__(self, relation):
         self.relation = relation
         # dot attributes
-        self.dot_attrs = {}     
+        self.dot_attrs = {}
 
     def __str__(self):
         return self.relation.name
@@ -180,25 +191,29 @@ class LeafOperator(Operator):
     def _dot(self, graph, prefix):
         node_name = prefix + 'Rel'
         node_label = self.relation.name
-        
+
         if(len(self.relation.indexes) > 0):
-            node_label = node_label + "\n Index on: "
+            node_label = node_label + '\n Index on: '
             keys = list(self.relation.indexes.keys())
             for i in range(0, len(keys), 1):
                 node_label = node_label + keys[i]
                 if(i < len(keys) - 1):
-                    node_label = node_label + ", "
-        
+                    node_label = node_label + ', '
+
         graph.node(node_name, node_label, **self.dot_attrs)
         return node_name
 
     def set_dot_attrs(self, attrs):
         self.dot_attrs = attrs
-        
+
     def get_schema(self):
         return build_schema(self.relation.attributes, self.relation.domains)
-    
-        
+
+
+#####################
+# Logical Operators #
+#####################
+
 class Selection(UnaryOperator):
     """The relational selection:
 
@@ -212,15 +227,15 @@ class Selection(UnaryOperator):
         self.set_dot_attrs({'color':'#FFD479', 'style': 'filled'})
 
     def __str__(self):
-        return "σ_[{}]({})".format(self.predicate, self.input)
+        return f'σ_[{self.predicate}]({self.input})'
 
-    def _dot(self, graph, prefix, caption="σ_[{}]"):
+    def _dot(self, graph, prefix, caption='σ_[{}]'):
         # build name and label and call helper function
         node_name = prefix + 'Sel'
         node_label = caption.format(self.predicate)
         self._dot_helper(graph, prefix, node_name, node_label)
         return node_name
-    
+
     def get_attributes_in_predicate(self):
         """
         Gets all attribute names within this predicate
@@ -239,8 +254,11 @@ class Selection(UnaryOperator):
                 for s in splits:
                     if(self.has_attribute(s)):
                         attribute_names.add(s)
-        return attribute_names    
-    
+        return attribute_names
+
+    def get_schema(self):
+        return self.input.get_schema()
+
     @staticmethod
     def _locals_dict(tup, attributes):
         """
@@ -255,40 +273,37 @@ class Selection(UnaryOperator):
         """
         # build dictionary
         return {attr: val for attr, val in zip(attributes, tup)}
-    
-    def get_schema(self):
-        return self.input.get_schema()
-    
-    
+
+
 class Projection(UnaryOperator):
     """"The relational projection:
 
     Attributes:
         input (:obj: `Operator`): The input to the projection operator.
-        attributes (`list` of :obj: `str`): The names of the attributes the input is projected on.
+        attributes (:obj: `str`): The names of the attributes the input is projected on, comma separated.
     """
     def __init__(self, input, attributes):
         super().__init__(input)
-        self.attributes = attributes
+        self.attributes = str_to_list(attributes)
         self.set_dot_attrs({'color':'#76D6FF', 'style': 'filled'})
 
     def __str__(self):
-        return "π_{}({})".format(self.attributes, self.input)
+        return f'π_[{", ".join(self.attributes)}({self.input})]'
 
-    def _dot(self, graph, prefix, caption="π_{}"):
+    def _dot(self, graph, prefix, caption='π_[{}]'):
         # build name and label and call helper function
         node_name = prefix + 'Pro'
-        node_label = caption.format(self.attributes)
+        node_label = caption.format(', '.join(self.attributes))
         self._dot_helper(graph, prefix, node_name, node_label)
         return node_name
-    
+
     def get_schema(self):
         child_schema = self.input.get_schema()
         child_attrs = [attr for (attr, dom) in child_schema]
         new_schema = [child_schema[child_attrs.index(attr)] for attr in self.attributes]
         return new_schema
-    
-    
+
+
 class Cartesian_Product(BinaryOperator):
     """The relational cartesion product
 
@@ -301,27 +316,28 @@ class Cartesian_Product(BinaryOperator):
         self.set_dot_attrs({'color':'#D4FB79', 'style': 'filled'})
 
     def __str__(self):
-        return "({}) × ({})".format(str(self.l_input), str(self.r_input))
+        return f'({self.l_input}) × ({self.r_input})'
 
-    def _dot(self, graph, prefix, caption="×"):
+    def _dot(self, graph, prefix, caption='×'):
         # build name and label and call helper function
         node_name = prefix + 'Car'
         node_label = caption
         self._dot_helper(graph, prefix, node_name, node_label)
         return node_name
-    
+
     def get_schema(self):
         l_child_schema = self.l_input.get_schema()
         r_child_schema = self.r_input.get_schema()
-        
+
         # integrity check (equally named attributes are not allowed here)
         l_attributes = [a for a, _ in l_child_schema]
         r_attributes = [a for a, _ in r_child_schema]
         assert len(set(l_attributes) & set(r_attributes)) == 0
-        
+
         # merge schema
-        return l_child_schema + r_child_schema      
-     
+        return l_child_schema + r_child_schema
+
+
 class Renaming_Relation(UnaryOperator):
     """"The renaming of a relation:
 
@@ -339,7 +355,7 @@ class Renaming_Relation(UnaryOperator):
         self.set_dot_attrs({'color':'#FF8AD8', 'style': 'filled'})
 
     def __str__(self):
-        return "ρ_[{}]({})".format(self.name, self.input)
+        return f'ρ_[{self.name}]({self.input})'
 
     def get_schema(self):
         # get child schema
@@ -347,15 +363,15 @@ class Renaming_Relation(UnaryOperator):
         # integrity checks
         assert self.name.isidentifier()  # the name should be an identifier
         return child_schema  # schema is left untouched
-        
-    def _dot(self, graph, prefix, caption="ρ_[{}]"):
+
+    def _dot(self, graph, prefix, caption='ρ_[{}]'):
         # build name and label and call helper function
         node_name = prefix + 'ReR'
         node_label = caption.format(self.name)
         self._dot_helper(graph, prefix, node_name, node_label)
         return node_name
 
-    
+
 class Renaming_Attributes(UnaryOperator):
     """"The renaming of attributes of a relation:
 
@@ -369,11 +385,11 @@ class Renaming_Attributes(UnaryOperator):
     """
     def __init__(self, input, changes):
         super().__init__(input)
-        self.changes = changes
+        self.changes = str_to_list(changes)
         self.set_dot_attrs({'color':'#FF8AD8', 'style': 'filled'})
 
     def __str__(self):
-        return "ρ_{}({})".format(self.changes, self.input)
+        return f'ρ_[{", ".join(self.changes)}({self.input})]'
 
     def get_schema(self):
         # get child schema
@@ -385,10 +401,10 @@ class Renaming_Attributes(UnaryOperator):
             new_attributes = Renaming_Attributes._parse_attribute_rename(expr, new_attributes)
         return build_schema(new_attributes, [d for _, d in child_schema])
 
-    def _dot(self, graph, prefix, caption="ρ_{}"):
+    def _dot(self, graph, prefix, caption='ρ_[{}]'):
         # build name and label and call helper function
         node_name = prefix + 'ReA'
-        node_label = caption.format(self.changes)
+        node_label = caption.format(', '.join(self.changes))
         self._dot_helper(graph, prefix, node_name, node_label)
         return node_name
 
@@ -418,7 +434,7 @@ class Renaming_Attributes(UnaryOperator):
                 return tuple(tmp_attributes)
         raise ValueError
 
-    
+
 class Theta_Join(BinaryOperator):
     """The relational theta join
 
@@ -437,7 +453,7 @@ class Theta_Join(BinaryOperator):
         self.set_dot_attrs({'color':'#FFFC79', 'style': 'filled'})
 
     def __str__(self):
-        return "({}) ⋈_[{}] ({})".format(self.l_input, self.theta, self.r_input)
+        return f'({self.l_input}) ⋈_[{self.theta}] ({self.r_input})'
 
     def get_attributes_in_predicate(self):
         """
@@ -457,63 +473,24 @@ class Theta_Join(BinaryOperator):
                 for s in splits:
                     if(self.has_attribute(s)):
                         attribute_names.add(s)
-        return attribute_names      
-    
+        return attribute_names
+
     def get_schema(self):
         l_child_schema = self.l_input.get_schema()
         r_child_schema = self.r_input.get_schema()
-        
+
         # integrity check (equally named attributes are not allowed here)
         l_attributes = [a for a, _ in l_child_schema]
         r_attributes = [a for a, _ in r_child_schema]
         assert len(set(l_attributes) & set(r_attributes)) == 0
-        
-        # merge schema
-        return l_child_schema + r_child_schema      
 
-    def _dot(self, graph, prefix, caption="⋈_[{}]"):
+        # merge schema
+        return l_child_schema + r_child_schema
+
+    def _dot(self, graph, prefix, caption='⋈_[{}]'):
         # build name and label and call helper function
         node_name = prefix + 'Join'
         node_label = caption.format(self.theta)
-        self._dot_helper(graph, prefix, node_name, node_label)
-        return node_name
-
-
-
-class Equi_Join(BinaryOperator):
-    """The relational equi join
-
-    Attributes:
-        l_input (:obj: `Operator`): The left input to the difference operator.
-        r_input (:obj: `Operator`): The right input to the difference operator.
-        l_attrs (`list` of :obj: `string`): The left attributes that should be equal.
-        r_attrs (`list` of :obj: `string`): The right attributes that should be equal.
-    """
-    def __init__(self, l_input, r_input, l_attrs, r_attrs):
-        super().__init__(l_input, r_input)
-        self.l_attrs = l_attrs
-        self.r_attrs = r_attrs
-        self.set_dot_attrs({'color':'#FFFC79', 'style': 'filled'})
-
-    def __str__(self):
-        return "({}) ⋈_{},{} ({})".format(self.l_input, self.l_attrs,
-                                          self.r_attrs, self.r_input)
-    def get_schema(self):
-        l_child_schema = self.l_input.get_schema()
-        r_child_schema = self.r_input.get_schema()
-        
-        # integrity check (equally named attributes are not allowed here)
-        l_attributes = [a for a, _ in l_child_schema]
-        r_attributes = [a for a, _ in r_child_schema]
-        assert len(set(l_attributes) & set(r_attributes)) == 0
-        
-        # merge schema
-        return l_child_schema + r_child_schema  
-
-    def _dot(self, graph, prefix, caption="⋈_{},{}"):
-        # build name and label and call helper function
-        node_name = prefix + 'Joi'
-        node_label = caption.format(self.l_attrs, self.r_attrs)
         self._dot_helper(graph, prefix, node_name, node_label)
         return node_name
 
@@ -526,23 +503,22 @@ class Grouping(UnaryOperator):
 
     Attributes:
         input (:obj: `Operator`): The input to the renaming operator.
-        group_by (`list` of :obj: `string`): A list of attributes the input should be grouped by.
-        aggregations (`list` of `tuple` of builtin function and :obj: `string`):
-            A list of aggregates of the form (builtin function, attribute)
+        group_by (:obj: `string`): The attributes the input should be grouped by, comma separated.
+        aggregations (:obj: `string`): Comma separated list of aggregations.
         builtin_to_str (`dict` of builtin function to :obj: `string`):
             Dict mapping builtin function to `string` represenation.
     """
-    builtin_to_str = {sum: 'sum', max:'max', min:'min', len:'count'}
+    builtin_to_str = {sum: 'sum', max:'max', min:'min', len:'count', statistics.mean:'avg'}
 
-    def __init__(self, input, groups, aggregations=[]):
+    def __init__(self, input, group_by, aggregations=''):
         super().__init__(input)
-        self.group_by = groups
-        self.aggregations = aggregations
+        self.group_by = str_to_list(group_by)
+        self.aggregations = Grouping._build_aggregations(aggregations)
         self.set_dot_attrs({'color':'#7A81FF', 'style': 'filled'})
 
     def __str__(self):
-        aggr = ["{}({})".format(self.builtin_to_str[func], attr) for func, attr in self.aggregations]
-        return "(γ_{} {} ({})".format(self.group_by, aggr, self.input)
+        aggr = [f'{self.builtin_to_str[func]}({attr})' for func, attr in self.aggregations]
+        return f'(γ_[{", ".join(self.group_by + aggr)}] ({self.input})'
 
     def get_schema(self):
         # get child schema
@@ -553,50 +529,84 @@ class Grouping(UnaryOperator):
             for g in self.group_by:
                 if(g == c[0]):
                     grp_schema.append(c)
+        # get aggregation attributes
+        to_schema = lambda fn, attr: (self.builtin_to_str[fn]+'_'+(attr if attr != '*' else 'star'), float if fn == statistics.mean else int)
+        agg_schema = [to_schema(fn, attr) for fn, attr in self.aggregations]
+        # combine both schemas
+        return grp_schema + agg_schema
 
-        # get aggregation attributes        
-        agg_schema = [(self.builtin_to_str[agg[0]]+'_'+agg[1], int) for agg in self.aggregations]
-        # combine
-        return grp_schema + agg_schema  # combine both schemas
-       
-
-    def _dot(self, graph, prefix, caption="γ_{} {}"):
+    def _dot(self, graph, prefix, caption='γ_[{}]'):
         # build name and label and call helper function
         node_name = prefix + 'Gro'
-        aggr = ["{}({})".format(self.builtin_to_str[func], attr) for func, attr in self.aggregations]
-        node_label = caption.format(self.group_by, aggr)
+        aggr = [f'{self.builtin_to_str[func]}({attr})' for func, attr in self.aggregations]
+        node_label = caption.format(', '.join(self.group_by + aggr))
         self._dot_helper(graph, prefix, node_name, node_label)
         return node_name
-    
-    
+
+    @staticmethod
+    def _build_aggregations(aggregations):
+        aggs = list()
+        for agg in aggregations.split(','):
+            agg = agg.strip()
+            fn = None
+            attr = None
+            if agg.startswith('count'):
+                if agg == 'count(*)':
+                    aggs.append((len, '*'))
+                    continue
+                else:
+                    fn = len
+                    agg = agg[6:]
+            elif agg.startswith('max'):
+                fn = max
+                agg = agg[4:]
+            elif agg.startswith('min'):
+                fn = min
+                agg = agg[4:]
+            elif agg.startswith('sum'):
+                fn = sum
+                agg = agg[4:]
+            elif agg.startswith('avg'):
+                fn = statistics.mean
+                agg = agg[4:]
+            else:
+                raise Exception(f'Aggregates could not be parsed, unknown aggergate function in {agg}.')
+            attr = agg[:-1]
+            if not attr.isalnum() or agg[-1] != ')':
+                raise Exception(f'Aggregates could not be parsed, incorrect attribute format in {agg}.')
+            aggs.append((fn, attr))
+        return aggs
+
+
 class Intersection(SetOperator):
     """The relational intersection operator
-    
+
     Attributes:
         l_input (:obj: Operator): The left input to the binary operator.
         r_input (:obj: Operator): The right input to the binary operator.
     """
     def __init__(self, l_input, r_input):
-        super().__init__(l_input, r_input, operator.and_, "∩")
-        
+        super().__init__(l_input, r_input, operator.and_, '∩')
+
 
 class Union(SetOperator):
     """The relational union operator
-    
+
     Attributes:
         l_input (:obj: Operator): The left input to the binary operator.
         r_input (:obj: Operator): The right input to the binary operator.
     """
     def __init__(self, l_input, r_input):
-        super().__init__(l_input, r_input, operator.or_, "∪")
-        
-        
+        super().__init__(l_input, r_input, operator.or_, '∪')
+
+
 class Difference(SetOperator):
     """The relational difference operator
-    
+
     Attributes:
         l_input (:obj: Operator): The left input to the binary operator.
         r_input (:obj: Operator): The right input to the binary operator.
     """
     def __init__(self, l_input, r_input):
-        super().__init__(l_input, r_input, operator.sub, "−")
+        super().__init__(l_input, r_input, operator.sub, '−')
+
