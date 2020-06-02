@@ -246,7 +246,6 @@ class Relation:
             `pandas.DataFrame` representation of the relation
         """
         df = pd.DataFrame(list(self.tuples), columns=self.attributes)
-        df.set_index(list(self.attributes), inplace=True)
         return df
 
 
