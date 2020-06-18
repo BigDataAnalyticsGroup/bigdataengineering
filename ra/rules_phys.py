@@ -208,7 +208,8 @@ class CompileGrouping(Rule):
         return isinstance(op, Grouping) and not isinstance(op, Grouping_HashBased)
 
     def _modify(self, op, parent):
-        physical_op = Grouping_HashBased(op.input, op.groups, op.aggregations)
+        physical_op = Grouping_HashBased(op.input, list_to_str(op.group_by), "")
+        physical_op.aggregations = op.aggregations  # overwrite aggregations, conversion via string
         self._replace(parent, op, op, physical_op, physical_op)
         return physical_op, parent
 

@@ -546,6 +546,8 @@ class Grouping(UnaryOperator):
     @staticmethod
     def _build_aggregations(aggregations):
         aggs = list()
+        if len(aggregations) == 0:
+            return
         for agg in aggregations.split(','):
             agg = agg.strip()
             fn = None
