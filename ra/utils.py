@@ -113,3 +113,16 @@ def str_to_list(string):
         A list of strings.
     """
     return list(map(lambda x: x.strip(), string.split(',')))
+
+
+def list_to_str(lst):
+    """
+    Produces a comma separated string from a list of strings.
+
+    Args:
+        lst (`list` of :obj: `string`): The list of strings.
+
+    Returns:
+        A comma separated string.
+    """
+    return ",".join(lst)

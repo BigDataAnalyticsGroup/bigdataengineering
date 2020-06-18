@@ -1,4 +1,5 @@
 from ra.rule import *
+from ra.utils import *
 
 
 class CompileSetOperator(Rule):
@@ -132,7 +133,7 @@ class CompileProjection(Rule):
         return isinstance(op, Projection) and not isinstance(op, Projection_ScanBased)
 
     def _modify(self, op, parent):
-        physical_op = Projection_ScanBased(op.input, op.attributes)
+        physical_op = Projection_ScanBased(op.input, list_to_str(op.attributes))
         self._replace(parent, op, op, physical_op, physical_op)
         return physical_op.input, physical_op
 
