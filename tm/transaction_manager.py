@@ -7,7 +7,7 @@
 from tm.table import Table
 from graphviz import Digraph
 from tm.codegen import Codegen
-from ra.schema_utils import build_schema
+from ra.utils import build_schema
 from tm.transaction import IsolationLevel, TransactionStatus
 from tm.transaction import MVCCTransaction, SVLockBasedTransaction
 
