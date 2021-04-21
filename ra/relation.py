@@ -157,7 +157,7 @@ class Relation:
         # here string representation of a relation is its schema
         print(str(self))
 
-    def print_table(self, limit=None):
+    def print_table(self, limit=None, _print=True):
         """
         Prints the relation and its tuples in a tabular layout
         """
@@ -177,12 +177,16 @@ class Relation:
         for tup in self.tuples:
             target += ''.join(str(attr_val).ljust(col_width) for attr_val in tup) + '\n'
             limitCount += 1
-            if limit != None and limitCount >= limit:
+            if limit != None and limitCount > limit:
                 target += "\nWARNING: skipping " + str(len(self.tuples)-limit) + " out of " + str(len(self.tuples)) + " tuples..."
                 break
-        print(target)
+        if _print:
+            print(target)
+        else:
+            return target
 
-    def print_set(self, limit=None):
+
+    def print_set(self, limit=None, _print=True):
         """
         Prints the relation and its tuples in set notation
         """
@@ -193,14 +197,17 @@ class Relation:
         for tup in self.tuples:
             target += '\t(' + ', '.join(str(attr) for attr in tup) + '),\n'
             limitCount += 1
-            if limit != None and limitCount >= limit:
+            if limit != None and limitCount > limit:
                 skip = True
                 break
         target = target.rstrip("\n").rstrip(",")
         if skip:
             target += "\n\tWARNING: skipping " + str(len(self.tuples)-limit) + " out of " + str(len(self.tuples)) + " tuples..."
         target += '\n}'
-        print(target)
+        if _print:
+            print(target)
+        else:
+            return target
 
     def print_latex(self):
         """
@@ -312,6 +319,10 @@ class Relation:
         rel = f'[{self.name}]'
         attrs = ', '.join([f'{self.attributes[i]}:{Relation.type_to_str[self.domains[i]]}' for i in range(len(self.attributes))])
         return f'{rel} : {{[{attrs}]}}'
+
+
+    def __repr__(self):
+        return self.print_table(limit=10, _print=False)
 
     def __len__(self):
         """
