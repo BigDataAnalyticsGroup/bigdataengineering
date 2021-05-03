@@ -177,7 +177,7 @@ class Relation:
         for tup in self.tuples:
             target += ''.join(str(attr_val).ljust(col_width) for attr_val in tup) + '\n'
             limitCount += 1
-            if limit != None and limitCount > limit:
+            if limit != None and limitCount >= limit:
                 target += "\nWARNING: skipping " + str(len(self.tuples)-limit) + " out of " + str(len(self.tuples)) + " tuples..."
                 break
         if _print:
@@ -197,7 +197,7 @@ class Relation:
         for tup in self.tuples:
             target += '\t(' + ', '.join(str(attr) for attr in tup) + '),\n'
             limitCount += 1
-            if limit != None and limitCount > limit:
+            if limit != None and limitCount >= limit:
                 skip = True
                 break
         target = target.rstrip("\n").rstrip(",")
