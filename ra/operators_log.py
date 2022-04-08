@@ -24,7 +24,7 @@ class Operator:
 
     def get_graph(self, print_source=False):
         """Computes a `graphviz.Digraph` of the operator and all its children."""
-        graph = Digraph(engine='circo')
+        graph = Digraph(engine='dot')
         self._dot(graph, '')
         if print_source:
             print(graph)
