@@ -1,3 +1,6 @@
 [submodule "third_party/vis_original"]
 	path = third_party/vis_original
 	url = https://github.com/visjs/vis_original.git
+[submodule "vagrant-bde"]
+	path = vagrant-bde
+	url = https://github.com/BigDataAnalyticsGroup/vagrant-bde
