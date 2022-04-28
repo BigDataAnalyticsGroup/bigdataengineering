@@ -128,7 +128,7 @@ In this section, we will discuss the usual workflow when using vagrant in the co
 On the host, clone this repository to the shared folder. Make sure, that submodules are also loaded by using the `--recursive` option.
 ```sh
 $ cd shared
-$ git clone --recurisve git@github.com:BigDataAnalyticsGroup/bigdataengineering.git
+$ git clone --recursive https://github.com/BigDataAnalyticsGroup/bigdataengineering
 ```
 Now your virtual machine has access to the notebooks and is ready to execute them using Jupyter.
 
