@@ -141,9 +141,9 @@ class SVLockBasedTransaction(Transaction):
                     True if the acquire was successful, False otherwise
         """
         msg, success = "", False
-        if dict_key < self.last_lock_id:
-            self.rollback()
-            return ("deadlock_avoided: lock-order incorrect", False)
+        # if dict_key < self.last_lock_id:
+        #     self.rollback()
+        #     return ("deadlock_avoided: lock-order incorrect", False)
 
         if dict_key in self.read_lock_list_local:
             return ("read_lock_acquired", True)
@@ -181,9 +181,9 @@ class SVLockBasedTransaction(Transaction):
                 success :bool
                     True if the acquire was successful, False otherwise
         """
-        if dict_key < self.last_lock_id:
-            self.rollback()
-            return ("deadlock_avoided: lock-order incorrect", False)
+        # if dict_key < self.last_lock_id:
+        #     self.rollback()
+        #     return ("deadlock_avoided: lock-order incorrect", False)
 
         if dict_key in self.write_lock_list_local:
             return ('write_lock_acquired', True)
