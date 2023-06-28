@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block page_title %}
+    <h1> Movies (Handwritten View)</h1>
+{% endblock %}
+
+{% block page_content %}
+    <table class="table table-bordered">
+        <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Year</th>
+            <th>Rank</th>
+            <th>Director</th>
+        </tr>
+        </thead>
+        {% for m in movies %}
+            <tr>
+                <td><a href="details/{{ m.pk }}">{{ m.pk }}</a></td>
+                <td>{{ m.name }}</td>
+                <td>{{ m.year }}</td>
+                <td>{{ m.rank }}</td>
+                <td>
+                    {% for d in m.director_set.all %}
+                        {{ d }}
+                    {% endfor %}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

@@ -1,0 +1,49 @@
+{######################################################################################################################}
+{##### Settings #}
+{######################################################################################################################}
+{% load bootstrap5 %}
+
+{# Load CSS and JavaScript #}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+{# Display django.contrib.messages as Bootstrap alerts #}
+{% bootstrap_messages %}
+
+
+{######################################################################################################################}
+{##### Page Title #}
+{######################################################################################################################}
+{% block page_title %}{% endblock %}
+
+
+{######################################################################################################################}
+{##### Navbar #}
+{######################################################################################################################}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="collapse navbar-collapse">
+    <ul class="navbar-nav">
+      <li class="nav-item active">
+        <a class="nav-link" href="{% url 'movies_index' %}">Movies (Handwritten View)</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'movie_list_view' %}">Movies (List View)</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'movie_statistics' %}">Statistics</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'movie_statistics2' %}">Statistics2</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'movie_search' %}">Search</a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+
+{######################################################################################################################}
+{##### Page Content #}
+{######################################################################################################################}
+{% block page_content %}{% endblock %}

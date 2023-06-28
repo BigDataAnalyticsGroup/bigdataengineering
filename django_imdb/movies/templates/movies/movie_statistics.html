@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block page_title %}
+    <h1> Number of Movies per Year</h1>
+{% endblock %}
+
+{% block page_content %}
+    <table class="table table-bordered">
+        <thead class="table-dark">
+        <tr>
+            <th>Year</th>
+            <th>Sum</th>
+        </tr>
+        </thead>
+        {% for mgc in movies_group_by_year_count %}
+            <tr>
+                <td>{{ mgc.year }}</td>
+                <td>{{ mgc.total }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    {{ sql_queries }}
+{% endblock %}

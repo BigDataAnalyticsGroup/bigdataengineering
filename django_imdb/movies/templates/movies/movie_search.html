@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block page_title %}
+<h1> Movie Search </h1>
+{% endblock %}
+
+{% block page_content %}
+    <form action="/html/search/" method="GET">
+        {{ form }}
+        <input type="submit" value="Search">
+    </form>
+
+    {% if movie %}
+        <p><b>Name:</b> {{movie.name}}</p>
+        <p><b>Year:</b> {{movie.year}}</p>
+        <p><b>Rating:</b> {{movie.rank}}</p>
+        <p><b>Actors:</b>
+            {% for a in actors %}
+                {{a.first_name}} {{a.last_name}},
+            {% endfor %}
+    {% endif %}
+
+{% endblock %}
