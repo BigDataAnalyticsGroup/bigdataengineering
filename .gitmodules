@@ -4,3 +4,6 @@
 [submodule "vagrant-bde"]
 	path = vagrant-bde
 	url = https://github.com/BigDataAnalyticsGroup/vagrant-bde.git
+[submodule "docker-bde"]
+	path = docker-bde
+	url = https://github.com/BigDataAnalyticsGroup/docker-bde.git
