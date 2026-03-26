@@ -1,6 +1,3 @@
-[submodule "third_party/vis_original"]
-	path = third_party/vis_original
-	url = https://github.com/visjs/vis_original.git
 [submodule "docker-bde"]
 	path = docker-bde
 	url = https://github.com/BigDataAnalyticsGroup/docker-bde.git
