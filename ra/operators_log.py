@@ -24,7 +24,8 @@ class Operator:
 
     def get_graph(self, print_source=False):
         """Computes a `graphviz.Digraph` of the operator and all its children."""
-        graph = Digraph(engine='dot')
+        graph = Digraph(engine='dot', encoding='utf-8')
+        graph.graph_attr['charset'] = 'UTF-8'
         self._dot(graph, '')
         if print_source:
             print(graph)
